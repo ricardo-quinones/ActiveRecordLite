@@ -2,14 +2,14 @@ require_relative './db_connection'
 
 module Searchable
   def where(params)
-    where_line = params.map { |key, val| "#{key} = ?" }.join(" AND ")
-
-    results = DBConnection.execute(<<-SQL, *params.values)
-      SELECT *
-        FROM #{table_name}
-       WHERE #{where_line}
+    attr_names = params.keys.map { |key| "#{key} = ?" }
+    DBConnection.execute(<<-SQL, *params.values)
+    SELECT
+      #{self.table_name}.*
+    FROM
+      #{self.table_name}
+    WHERE
+      #{attr_names.join(' AND ')}
     SQL
-
-    parse_all(results)
   end
 end

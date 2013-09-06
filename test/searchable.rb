@@ -15,5 +15,8 @@ class Human < SQLObject
   my_attr_accessible(:id, :fname, :lname, :house_id)
 end
 
-p Cat.where(:name => "Breakfast")
+p Cat.all
+p Human.all
+
+p Cat.where(:name => "Gizmo")
 p Human.where(:fname => "Matt", :house_id => 1)

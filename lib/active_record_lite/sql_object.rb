@@ -6,70 +6,74 @@ require_relative './mass_object'
 require_relative './searchable'
 
 class SQLObject < MassObject
-  extend Associatable
   extend Searchable
 
   def self.set_table_name(table_name)
-    @table_name = table_name
+    name = table_name.pluralize
+    @table_name = name.underscore
   end
 
   def self.table_name
-    @table_name || self.name.underscore
+    @table_name
   end
 
   def self.all
     results = DBConnection.execute(<<-SQL)
-      SELECT *
-        FROM #{table_name}
+      SELECT
+        "#{table_name}".*
+      FROM
+        "#{table_name}"
     SQL
 
-    parse_all(results)
+    results
   end
 
   def self.find(id)
     results = DBConnection.execute(<<-SQL, id)
-      SELECT *
-        FROM #{table_name}
-       WHERE id = ?
+      SELECT
+        "#{table_name}".*
+      FROM
+        "#{table_name}"
+      WHERE
+        "#{table_name}".id = ?
     SQL
 
-    parse_all(results).first
+    results.empty? ? nil : self.new(results.first)
   end
 
   def save
-    if id.nil?
+    if self.id == nil
       create
     else
       update
     end
   end
 
-  private
+ #  private
   def attribute_values
-    self.class.attributes.map { |attr| self.send(attr) }
+    self.class.attributes.drop(1).map { |attr_name| self.send("#{attr_name}") }
   end
 
   def create
-    attr_names = self.class.attributes.join(", ")
-    question_marks = (["?"] * self.class.attributes.count).join(", ")
-
+    num = attribute_values.length
     DBConnection.execute(<<-SQL, *attribute_values)
-      INSERT INTO
-        #{self.class.table_name} (#{attr_names})
-      VALUES
-        (#{question_marks})
+    INSERT INTO
+      #{self.class.table_name} (#{self.class.attributes.drop(1).join(', ')})
+    VALUES
+      (#{(['?'] * num).join(', ')})
     SQL
-
     self.id = DBConnection.last_insert_row_id
   end
 
   def update
-    set_line = self.class.attributes.map { |attr| "#{attr} = ?" }.join(", ")
-
-    DBConnection.execute(<<-SQL, *attribute_values, id)
-      UPDATE #{self.class.table_name}
-         SET #{set_line}
-       WHERE id = ?
+    set_line = self.class.attributes.drop(1).map { |attr_name| "#{attr_name} = ?"}.join(", ")
+    DBConnection.execute(<<-SQL, *attribute_values)
+    UPDATE
+      #{self.class.table_name}
+    SET
+      #{set_line}
+    WHERE
+      #{self.class.table_name}.id = #{self.id}
     SQL
   end
 end

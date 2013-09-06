@@ -15,13 +15,15 @@ class Human < SQLObject
   my_attr_accessible(:id, :fname, :lname, :house_id)
 end
 
-p Human.find(1)
-p Cat.find(1)
-p Cat.find(2)
+# h1 = Human.find(1)
+# h2 = Human.new({fname: "John", lname: "Doe", house_id: 2})
+#
+# h1.fname = "Jacob"
+#
+# h1.save
+# h2.save
 
-p Human.all
-p Cat.all
-
-c = Cat.new(:name => "Gizmo", :owner_id => 1)
-c.save # create
-c.save # update
+# p Cat.all
+# p Human.all
+#
+# p Human.find(3)
