@@ -15,7 +15,7 @@ class SQLObject < MassObject
   end
 
   def self.table_name
-    @table_name
+    @table_name || self.name.tableize
   end
 
   def self.all

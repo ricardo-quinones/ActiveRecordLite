@@ -43,20 +43,22 @@ end
 module Associatable
 
   def assoc_params
-
+    @assoc_params ||= {}
+    @assoc_params
   end
 
   def belongs_to(name, params = {})
     aps = BelongsToAssocParams.new(name, params)
+    self.assoc_params[name] = aps
 
     define_method(name) do
       results = DBConnection.execute(<<-SQL, self.send(aps.foreign_key))
-      SELECT
-        #{aps.other_table}.*
-      FROM
-        #{aps.other_table}
-      WHERE
-        #{aps.other_table}.#{aps.primary_key} = ?
+        SELECT
+          #{aps.other_table}.*
+        FROM
+          #{aps.other_table}
+        WHERE
+          #{aps.other_table}.#{aps.primary_key} = ?
       SQL
 
       aps.other_class.parse_all(results).first
@@ -68,12 +70,12 @@ module Associatable
 
     define_method(name) do
       results = DBConnection.execute(<<-SQL, self.send(aps.primary_key))
-      SELECT
-        #{aps.other_table}.*
-      FROM
-        #{aps.other_table}
-      WHERE
-        #{aps.other_table}.#{aps.foreign_key} = ?
+        SELECT
+          #{aps.other_table}.*
+        FROM
+          #{aps.other_table}
+        WHERE
+          #{aps.other_table}.#{aps.foreign_key} = ?
       SQL
 
       aps.other_class.parse_all(results)
@@ -81,6 +83,29 @@ module Associatable
   end
 
   def has_one_through(name, assoc1, assoc2)
-
+    define_method(name) do
+      aps1 = self.class.assoc_params[assoc1]
+      aps2 = aps1.other_class.assoc_params[assoc2]
+      # p "human"
+#       p aps1.foreign_key
+#       p aps1.primary_key
+#       p "house"
+#       p aps2.foreign_key
+#       p aps2.primary_key
+#       p aps1.other_class.send(aps2.foreign_key)
+      results = DBConnection.execute(<<-SQL, aps2.send(aps2.foreign_key))
+        SELECT
+          house.*
+        FROM
+          #{aps2.other_table} AS house
+        JOIN
+          #{aps1.other_table} AS human
+        ON human.#{aps2.foreign_key} = house.#{aps2.primary_key}
+        WHERE
+          house.#{aps2.primary_key} = ?
+      SQL
+      p results
+      # aps2.other_class.parse_all(results).first
+    end
   end
 end
