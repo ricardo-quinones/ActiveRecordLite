@@ -27,17 +27,12 @@ class House < SQLObject
 end
 
 cat = Cat.find(1)
-# p Cat.all
-# p cat.human
-#
-h = Human.find(2)
-# p Human.all
-# p h.house
-# p h.cats
-# p Cat.table_name
-# p House.table_name
-p cat.owner_id
-p h.house_id
-p Cat.assoc_params[:human]
-p Human.assoc_params[:house]
+human = Human.find(1)
+
+p Cat.all
+p Human.all
+
+p cat.human
+p human.house
+
 p cat.house
