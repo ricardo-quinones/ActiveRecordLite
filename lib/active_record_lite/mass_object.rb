@@ -22,8 +22,8 @@ class MassObject
   end
 
   def self.parse_all(results)
+    results.map { |hash| self.new(hash) }
   end
-
 
   def initialize(params = {})
     params.each do |attribute, value|
@@ -36,24 +36,3 @@ class MassObject
     end
   end
 end
-
-# class Cat < MassObject
-#   my_attr_accessible :name, :gender
-# end
-#
-# ikki = Cat.new({:name => "ikki", :gender => "male"})
-#
-# p ikki
-
-# ikki.name = "thomas"
-# ikki.gender = "male"
-#
-# p ikki.name
-# p ikki.gender
-
-# hash = {:name => "ikki"}
-#
-# hash.each do |attribute, value|
-#   puts "true" if Cat.attributes.include?(attribute)
-# end
-#

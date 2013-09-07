@@ -7,10 +7,11 @@ require_relative './searchable'
 
 class SQLObject < MassObject
   extend Searchable
+  extend Associatable
 
   def self.set_table_name(table_name)
-    name = table_name.pluralize
-    @table_name = name.underscore
+    name = table_name.tableize
+    @table_name = name
   end
 
   def self.table_name
@@ -25,7 +26,7 @@ class SQLObject < MassObject
         "#{table_name}"
     SQL
 
-    results
+    parse_all(results)
   end
 
   def self.find(id)
@@ -38,7 +39,7 @@ class SQLObject < MassObject
         "#{table_name}".id = ?
     SQL
 
-    results.empty? ? nil : self.new(results.first)
+    results.empty? ? nil : parse_all(results).first
   end
 
   def save
@@ -49,7 +50,7 @@ class SQLObject < MassObject
     end
   end
 
- #  private
+  private
   def attribute_values
     self.class.attributes.drop(1).map { |attr_name| self.send("#{attr_name}") }
   end

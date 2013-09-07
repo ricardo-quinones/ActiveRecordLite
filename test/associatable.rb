@@ -10,7 +10,7 @@ class Cat < SQLObject
   my_attr_accessible(:id, :name, :owner_id)
 
   belongs_to :human, :class_name => "Human", :primary_key => :id, :foreign_key => :owner_id
-  has_one_through :house, :human, :house
+  # has_one_through :house, :human, :house
 end
 
 class Human < SQLObject
@@ -27,11 +27,20 @@ class House < SQLObject
 end
 
 cat = Cat.find(1)
-p cat
+# p cat.methods
+# p Cat.methods
+# Cat.belongs_to(:human, :class_name => "Human", :primary_key => :id, :foreign_key => :owner_id)
+p Cat.all
 p cat.human
 
-human = Human.find(1)
-p human.cats
-p human.house
+h = Human.find(2)
+p Human.all
+p h.house
+p h.cats
+p Cat.table_name
 
-p cat.house
+# human = Human.find(1)
+# p human.cats
+# p human.house
+#
+# p cat.house
