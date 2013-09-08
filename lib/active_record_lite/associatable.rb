@@ -15,7 +15,7 @@ class AssocParams
 end
 
 class BelongsToAssocParams < AssocParams
-  def initialize(name, params)
+  def initialize(name, params = {})
     @other_class_name = params[:class_name] || name.to_s.camelize
     @primary_key = params[:primary_key] || :id
     @foreign_key = params[:foreign_key] || "#{name}_id".to_sym
@@ -27,7 +27,7 @@ class BelongsToAssocParams < AssocParams
 end
 
 class HasManyAssocParams < AssocParams
-  def initialize(name, params, self_class)
+  def initialize(name, params = {}, self_class)
     @other_class_name = params[:class_name] ||
       name.to_s.singularize.camelize
     @primary_key = params[:primary_key] || :id
@@ -86,7 +86,7 @@ module Associatable
     define_method(name) do
       aps1 = self.class.assoc_params[assoc1]
       aps2 = aps1.other_class.assoc_params[assoc2]
-      
+
       results = DBConnection.execute(<<-SQL, self.send(aps1.foreign_key))
         SELECT
           house.*
@@ -98,7 +98,7 @@ module Associatable
         WHERE
           human.#{aps1.primary_key} = ?
       SQL
-      
+
       aps2.other_class.parse_all(results).first
     end
   end
